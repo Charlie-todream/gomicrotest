@@ -4,23 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
 )
 
 func DecodeUserRequest(c context.Context, r *http.Request) (interface{},error) {
-	// http://localhost:xxx/?uid=101
-	if r.URL.Query().Get("uid") != "" {
-		uid,_ := strconv.Atoi(r.URL.Query().Get("uid"))
-		return UserRequest{
-			Uid:uid,
-			Method: r.Method,
-		},nil
+
+	// r.URL.Query().Get("uid") != ""
+
+	vars := mux.Vars(r)
+	if uid,ok := vars["uid"];ok {
+			uid,_:= strconv.Atoi(uid)
+			return UserRequest{
+				Uid:uid,
+				Method: r.Method,
+			},nil
+		}
+		return nil,errors.New("参数错误")
 	}
-
-	return nil,errors.New("参数错误")
-}
-
 
 func EncodeUserResponse(ctx context.Context,w http.ResponseWriter,response interface{}) error {
 	w.Header().Set("Content-type","application/json")
