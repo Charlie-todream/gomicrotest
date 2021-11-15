@@ -14,6 +14,7 @@ func DecodeUserRequest(c context.Context, r *http.Request) (interface{},error) {
 		uid,_ := strconv.Atoi(r.URL.Query().Get("uid"))
 		return UserRequest{
 			Uid:uid,
+			Method: r.Method,
 		},nil
 	}
 

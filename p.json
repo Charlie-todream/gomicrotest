@@ -1,0 +1,19 @@
+{
+  "ID": "userservice1",
+  "Name": "userservice",
+  "Tags": ["primary", "v1"],
+  "Address": "192.168.1.124",
+  "Port": 8080,
+  "Meta": {
+    "userservice_version": "4.0"
+  },
+  "EnableTagOverride": false,
+  "Check": {
+    "HTTP": "http://192.168.1.124:8080/health",
+    "Interval": "10s"
+  },
+  "Weights": {
+    "Passing": 10,
+    "Warning": 1
+  }
+}
