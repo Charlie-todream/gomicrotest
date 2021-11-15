@@ -24,3 +24,7 @@ curl
 http://127.0.0.1:8500/v1/agent/service/register?replace-existing-checks=true **// 注销服务** curl
 --request PUT
 http://127.0.0.1:8500/v1/agent/service/deregister/userservice1
+
+**启动服务**
+
+go run main.go --name userservice -p 8080
