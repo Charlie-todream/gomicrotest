@@ -12,7 +12,7 @@ type UserService struct {
 
 func (this UserService) GetName(userid int) string {
 	if userid == 101 {
-		return "charlie"
+		return "charlie66"
 	}
 	return "guest"
 }
@@ -23,5 +23,3 @@ func (this UserService) DelUser(userid int) error {
 	}
 	return nil
 }
-
-

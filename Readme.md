@@ -21,7 +21,10 @@ http://192.168.1.124:8500/v1/agent/services
 curl
 --request PUT
 --data @p.json
-http://127.0.0.1:8500/v1/agent/service/register?replace-existing-checks=true **// 注销服务** curl
+http://127.0.0.1:8500/v1/agent/service/register?replace-existing-checks=true 
+
+**// 注销服务** 
+curl
 --request PUT
 http://127.0.0.1:8500/v1/agent/service/deregister/userservice1
 

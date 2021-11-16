@@ -5,17 +5,17 @@ import (
 	"github.com/google/uuid"
 	consulapi "github.com/hashicorp/consul/api"
 	"log"
-	"strconv"
 )
+
 var ConsulClient *consulapi.Client
 var ServiceId string
 var ServiceName string
 var ServicePort int
 
-func init () {
+func init() {
 	config := consulapi.DefaultConfig()
-	config.Address="192.168.1.124:8500"
-	client,err:= consulapi.NewClient(config)
+	config.Address = "192.168.1.124:8500"
+	client, err := consulapi.NewClient(config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,31 +23,31 @@ func init () {
 	ServiceId = "userservice" + uuid.New().String()
 }
 
-func SetServiceNameAndPort(name string,port int)  {
+func SetServiceNameAndPort(name string, port int) {
 	ServiceName = name
 	ServicePort = port
 }
-func RegService()  {
+func RegService() {
 	config := consulapi.DefaultConfig()
-	config.Address="192.168.1.124:8500"
+	config.Address = "192.168.1.124:8500"
 
 	reg := consulapi.AgentServiceRegistration{}
-	reg.ID =ServiceId
-	reg.Name=ServiceName
-	reg.Address="192.168.1.124"
-	reg.Port=ServicePort
-	reg.Tags=[]string{"primary"}
+	reg.ID = ServiceId
+	reg.Name = ServiceName
+	reg.Address = "192.168.1.124"
+	reg.Port = ServicePort
+	reg.Tags = []string{"primary"}
 	check := consulapi.AgentServiceCheck{}
-	check.Interval="5s"
-	check.HTTP="http://192.168.1.124:"+strconv.Itoa(ServicePort)+"/health"
-
+	check.Interval = "5s"
+	//check.HTTP="http://192.168.1.124:"+strconv.Itoa(ServicePort)+"/health"
+	check.HTTP = fmt.Sprintf("http://%s:%d/health", reg.Address, ServicePort)
 	reg.Check = &check
-
 
 	fmt.Println("启动一个服务")
 	ConsulClient.Agent().ServiceRegister(&reg)
 }
 
-func Unregservice(){
-	ConsulClient.Agent().ServiceDeregister("userservice1")
+func Unregservice() {
+	fmt.Println("注销一个服务" + ServiceId)
+	ConsulClient.Agent().ServiceDeregister(ServiceId)
 }
