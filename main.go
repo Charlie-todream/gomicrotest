@@ -45,8 +45,12 @@ func main() {
 
 	// 限流调用
 	limit := rate.NewLimiter(1, 5)
-	endp := Services.RateLimit(limit)(Services.UserServiceLogMiddleware(logger)(Services.GenUserEndpoint(user)))
+	endp := Services.RateLimit(limit)(Services.UserServiceLogMiddleware(logger)(Services.CheckTokenMiddleware()(Services.GenUserEndpoint(user))))
+	//增加handler用于获取token
+	accessService := &Services.AccessService{}
+	accessServiceEndpoint := Services.AccessEndpoint(accessService)
 
+	accessHandler := httptransport.NewServer(accessServiceEndpoint, Services.DecodeAccessRequest, Services.EncodeAccessResponse)
 	options := []httptransport.ServerOption{
 		//  生产ServerOption 切片,传入我们自定义的错误处理
 		httptransport.ServerErrorEncoder(Services.MyErrorEncoder),
@@ -54,7 +58,7 @@ func main() {
 
 	serverHandler := httptransport.NewServer(endp, Services.DecodeUserRequest, Services.EncodeUserResponse, options...)
 	router := mux.NewRouter()
-
+	router.Methods("POST").Path("/access-token").Handler(accessHandler)            //注册token获取的handler
 	router.Methods("GET", "DELETE").Path(`/user/{uid:\d+}`).Handler(serverHandler)
 
 	router.Methods("GET").Path("/health").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
