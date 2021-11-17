@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	log2 "github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 	"golang.org/x/time/rate"
 	"log"
+
 	"net/http"
 	"os"
 	"os/signal"
@@ -29,13 +31,21 @@ func main() {
 	if *port == 0 {
 		log.Fatal("请指定端口")
 	}
+
+	var logger log2.Logger
+	{
+		logger = log2.NewLogfmtLogger(os.Stdout)
+		logger = log2.WithPrefix(logger,"mykit","1.0")
+		logger = log2.WithPrefix(logger,"time",log2.DefaultTimestampUTC)
+		logger = log2.WithPrefix(logger,"caller",log2.DefaultCaller)
+	}
 	util.SetServiceNameAndPort(*name, *port)
 
 	user := Services.UserService{}
 
 	// 限流调用
 	limit := rate.NewLimiter(1, 5)
-	endp := Services.RateLimit(limit)(Services.GenUserEndpoint(user))
+	endp := Services.RateLimit(limit)(Services.UserServiceLogMiddleware(logger)(Services.GenUserEndpoint(user)))
 
 	options := []httptransport.ServerOption{
 		//  生产ServerOption 切片,传入我们自定义的错误处理

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/log"
 	"golang.org/x/time/rate"
 	"net/http"
 	"service.gomicro.test/util"
@@ -38,7 +39,7 @@ func GenUserEndpoint(userService IUserService) endpoint.Endpoint {
 	}
 }
 
-// 加入限流功能
+// 加入限流功能中间件
 func RateLimit(limit *rate.Limiter) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
@@ -47,6 +48,17 @@ func RateLimit(limit *rate.Limiter) endpoint.Middleware {
 
 			}
 			return next(ctx, request)
+		}
+	}
+}
+
+// 日志中间件
+func UserServiceLogMiddleware(logger log.Logger) endpoint.Middleware  {
+	return func(next endpoint.Endpoint) endpoint.Endpoint {
+		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+			r := request.(UserRequest)
+			logger.Log("method",r.Method,"event","get user",r.Uid)
+			return next(ctx,request)
 		}
 	}
 }
